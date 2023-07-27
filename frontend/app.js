@@ -1,60 +1,35 @@
-import React, { useEffect, useState } from  "react";
-import axios from  "axios";
-import "./import express from 'express'";
+const express = require("express");
+const app = express();
+const cors = require("cors");
 
-//import routes from './routes';
+app.use(cors());
 
-class App {
-  constructor() {
-    this.server = express();
-    this.middlewares();
-    this.routes();
-  }
+// Create arrays representing planets and their properties
+const planets = [
+  // The planet objects you already have
+];
 
-  middlewares() {
-    this.server.use(express.json());
-  }
-
-  routes() {
-    //this.server.use(routes);
-  }
+// Setting up function to update the positions of planets based on their speed
+function updatePos() {
+  planets.forEach((planet) => {
+    planet.rotationSpeed += 0.001; // The rotation speed will be increasing with time
+    const angle = planet.rotationSpeed % (2 * Math.PI);
+    planet.x = planet.distance * Math.cos(angle);
+    planet.y = planet.distance * Math.sin(angle);
+  });
 }
 
-export default new App().server;
-import { response } from "express";
+// Using setInterval() to call updatePos() function at a regular interval (using WebSocket or Socket.io)
+setInterval(() => {
+  updatePos();
+}, 100); // Update every 100ms
 
-function App(){
-    const [planets, setPlanets] = useState([]);
+app.get("/planets", (req, res) => {
+  res.json(planets);
+});
 
-    useEffect(() => {
-        // fetching data from the backend server
-        axios.get("/http://localhost:4444/planets").then((response) =>{
-            setPlanets(response.data);
-        })
-    }, []);
-    
-    return (
-        <div className="app">
-            <h1>3D planet visuliser</h1>
-            <div className="planet-container">
-                {planets.map((planet) =>(
-                    <div
-                    key={planet.name}
-                    className = "planet"
-                    style={{
-                        width: planet.radius * 2 + "px",
-                        height: planet.radius * 2 + "px",
-                        left: `calc(50% -${planet.x}px)`,
-                        top:`calc(50% - ${planet.y}px)`,
-                    }}
-                    >
-                        {planet.name}
-                        </div>
-                ))}
-            </div>
-        </div>
-    );
-    
-}
+const PORT = process.env.PORT || 4444;
 
-export default App;
+app.listen(PORT, () => {
+  console.log(`The server is running mate in ${PORT}`);
+});
